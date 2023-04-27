@@ -2,7 +2,7 @@
 **Author Name**: Esraa Obeido
 
 ## WRRC 
-![WRRC](./WRRC.jpeg)
+![WRRC](./wrrc.jpeg)
 
 ## overview:
 #### The purpous of this lab is to build a movie app that can check the latest movies based on categories.
