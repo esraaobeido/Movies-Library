@@ -1,8 +1,12 @@
 'use strict';
 require("dotenv").config();
+const pg = require("pg");
+const client = new pg.Client(process.env.DATABASE_URL);
+// const data = require('./Movie Data/data.json');
 const express = require("express");
 const app = express();
 const cors = require('cors');
+app.use(express.json());
 const axios= require("axios");
 app.use(cors());
 const movieKey = process.env.API_KEY;
@@ -15,6 +19,7 @@ function Movie(id, title, release_date, poster_path, overview){
     this.release_date = release_date;
     this.poster_path = poster_path;
     this.overview = overview;
+    // this.comments = comments
 }
 
 // Routes
@@ -24,13 +29,43 @@ app.get("/trending", handleTrending);
 app.get("/search", handleSearchByName);
 app.get("/videos", handleVideos);
 app.get("/genre", handleGenre);
+app.get("/getMovies", handleGetMovies);
+app.post("/getMovies", handleAddMovie);
 
 //handlers
-function handleHome(req, res){
-  let movies = data.map((item) => {
-    return new Movie(item.id, item.title, item.release_date, item.poster_path, item.overview);
+function handleGetMovies(req, res){
+  const sql = 'SELECT * FROM movies';
+  client.query(sql)
+  .then((data) => {
+      let dataFromDB = data.rows.map((item) => {
+          let singleMovie = new Movie(
+              item.id,
+              item.title,
+              item.release_date,
+              item.poster_path,
+              item.overview
+          )
+          return singleMovie;
+      });
+      res.send(dataFromDB);
   })
-  res.json(movies);
+}
+
+function handleAddMovie(req, res){
+  console.log("handleAddMovie route called");
+  const movie = req.body;
+  const { id, title, release_date, poster_path, overview, comments } = movie;
+  const values = [id, title, release_date, poster_path, overview, comments];
+  const sql = `INSERT into movies (id, title, release_date, poster_path, overview, comments) values ($1,$2,$3,$4,$5,$6) RETURNING *;`;  
+  client.query(sql, values).then((data) => {
+    res.status(201).send(data.rows);
+    res.send('added successfully');
+  });
+}
+
+
+function handleHome(req, res){
+  res.send("Welcome to Database Home");
 }
 
 function handleFavorite(req, res){
@@ -88,6 +123,8 @@ app.use((err, req, res, next) => {
     });
 });
 
+client.connect().then(() => {
 app.listen(port, () => {
-    console.log(`server is listing on port ${port}`);
+   console.log(`server is listing on port ${port}`);
+});
 });
