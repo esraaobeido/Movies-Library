@@ -13,13 +13,13 @@ const movieKey = process.env.API_KEY;
 const port = process.env.PORT;
 
 // Create Movie constructor
-function Movie(id, title, release_date, poster_path, overview){
+function Movie(id, title, release_date, poster_path, overview, comments){
     this.id = id;
     this.title = title;
     this.release_date = release_date;
     this.poster_path = poster_path;
     this.overview = overview;
-    // this.comments = comments
+    this.comments = comments
 }
 
 // Routes
@@ -31,8 +31,50 @@ app.get("/videos", handleVideos);
 app.get("/genre", handleGenre);
 app.get("/getMovies", handleGetMovies);
 app.post("/getMovies", handleAddMovie);
+app.delete("/delete/:id", deleteMoviesHandler); 
+app.put("/update/:id", updateMoviesHandler);
+app.get("/getMovie/:id", getMovieHandler);
 
 //handlers
+
+function updateMoviesHandler(req, res) {
+  const movieId = req.params.id;
+  const values = [req.body.comments];
+  const sql = `UPDATE movies SET comments=$1 WHERE id=${movieId} RETURNING *;`;
+  client.query(sql, values).then((data) => {
+    res.status(200).send(data.rows);
+  });
+}
+
+function deleteMoviesHandler(req, res) {
+  const movieId = req.params.id;
+  if(!movieId) {
+    res.status(400).send('Movie id is missing');
+    return;
+  }
+  const sql = `DELETE FROM movies WHERE id=${movieId} RETURNING *;`;
+  client.query(sql).then((data) => {
+    res.status(202).send('deleted');
+  });
+} 
+
+function getMovieHandler(req, res) {
+  const movieId = req.params.id;
+  const sql = `SELECT * FROM movies WHERE id=${movieId};`;
+  client.query(sql)
+  .then((data) => {
+    const movie = data.rows.map((item) => new Movie(
+      item.id,
+      item.title,
+      item.release_date,
+      item.poster_path,
+      item.overview,
+      item.comments
+    ));
+    res.status(200).send(movie);
+  });
+}
+
 function handleGetMovies(req, res){
   const sql = 'SELECT * FROM movies';
   client.query(sql)
@@ -43,7 +85,8 @@ function handleGetMovies(req, res){
               item.title,
               item.release_date,
               item.poster_path,
-              item.overview
+              item.overview,
+              item.comments
           )
           return singleMovie;
       });
