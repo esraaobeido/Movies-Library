@@ -2,14 +2,14 @@
 **Author Name**: Esraa Obeido
 
 ## WRRC 
-![WRRC](./wrrc3.jpeg)
+![WRRC](./WRRC4.png)
 
 ## overview:
-#### For today's lab, we set up our database and read and save the data in it.
+#### For today's lab, we updated and deleted an entry in our database.
+
 
 ## Getting Started:
-#### In the first step, we created a database and created a table.
-#### after that we inserted information into this table and displayed it when we hit the route i just created.
+#### We created routs for delete and update our database.
 
 
 ## Project Features:
@@ -20,4 +20,7 @@
 - Genre route is to allow the user to filter movies by their genres. 
 - Get movies: Create a get request to get all the data from the database.
 - Add Movie : create a post request to save a specific movie to database along with your personal comments.
+- Update route uesd for updating the comments of a specific movie in the database.
+- Delete route to remove a specific movie from your database.
+- Create a get request to get a specific movie from the database.
 
